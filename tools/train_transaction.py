@@ -25,6 +25,7 @@ import torch.utils.data
 import torch.utils.data.distributed
 import torchvision.transforms as transforms
 from torch.utils.tensorboard import SummaryWriter
+from torchvision.transforms.transforms import RandomHorizontalFlip, RandomVerticalFlip
 
 import _init_paths
 from config import cfg
@@ -179,6 +180,8 @@ def main():
         cfg, cfg.DATASET.ROOT, cfg.DATASET.TRAIN_SET, True,
         transforms.Compose([
             transforms.ToTensor(),
+            transforms.RandomHorizontalFlip(p=0.5),
+            transforms.RandomVerticalFlip(p=0.5),
             normalize,
         ])
     )
