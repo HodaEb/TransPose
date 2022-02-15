@@ -48,6 +48,9 @@ class stanford(Dataset):
         self.image_height = cfg.MODEL.IMAGE_SIZE[1]
         self.aspect_ratio = self.image_width * 1.0 / self.image_height
         self.transform = transform
+        self.rotation = cfg.DATASET.ROT_FACTOR
+        self.scale_factor = cfg.DATASET.SCALE_FACTOR
+        self.is_train = is_train
         # self.Tensor = T.ToTensor()
         # self.Resize = T.Resize((224, 224))
         self.color_rgb = cfg.DATASET.COLOR_RGB
@@ -146,7 +149,10 @@ class stanford(Dataset):
         c = db_rec['center']
         s = db_rec['scale']
         score = db_rec['score'] if 'score' in db_rec else 1
-        r = 0
+        if self.is_train:
+            r = self.rotation
+        else:
+            r = 0
 
         # if self.is_train:
         #     if (np.sum(joints_vis[:, 0]) > self.num_joints_half_body
