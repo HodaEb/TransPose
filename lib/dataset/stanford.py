@@ -154,6 +154,8 @@ class stanford(Dataset):
         else:
             r = 0
 
+        # r = 0
+
         # if self.is_train:
         #     if (np.sum(joints_vis[:, 0]) > self.num_joints_half_body
         #             and np.random.rand() < self.prob_half_body):
