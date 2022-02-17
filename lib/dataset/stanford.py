@@ -150,7 +150,8 @@ class stanford(Dataset):
         s = db_rec['scale']
         score = db_rec['score'] if 'score' in db_rec else 1
         if self.is_train:
-            r = random.randint(-self.rotation, self.rotation)
+            # r = random.randint(-self.rotation, self.rotation)
+            r = 0
         else:
             r = 0
 

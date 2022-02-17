@@ -273,7 +273,7 @@ def train_transaction(config, train_loader, model, criterion, optimizer, epoch,
         # compute gradient and do update step
         optimizer.zero_grad()
         loss.backward()
-        plot_grad_flow(model.named_parameters())
+        # plot_grad_flow(model.named_parameters())
         optimizer.step()
 
         # b = list()
