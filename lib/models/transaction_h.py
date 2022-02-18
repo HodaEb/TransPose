@@ -823,7 +823,7 @@ class TransActionH(nn.Module):
         r = self.action_encoder_branch_part1(r)
         r = torch.flatten(r, 1)
         r = self.action_encoder_branch_part2(r)
-        r = self.action_softmax1(r)
+        # r = self.action_softmax1(r)
 
         z = self.action_hrnet_features_branch_96(y_list[1])
         z = torch.flatten(z, 1)
@@ -832,18 +832,18 @@ class TransActionH(nn.Module):
         t = torch.flatten(t, 1)
         concat = torch.cat((z, t), dim=1)
         concat = self.action_hrnet_features_branch_concat(concat)
-        concat = self.action_softmax2(concat)
+        # concat = self.action_softmax2(concat)
 
         q = self.action_skeleton_branch(skeleton_vecs)
-        q = self.action_softmax3(q)
+        # q = self.action_softmax3(q)
 
-        r = self.a1 * r + self.a2 * concat + self.a3 * q
+        # r = self.a1 * r + self.a2 * concat + self.a3 * q
 
         # return x, atten_maps
         # return x
 
         # return y, x  # , z
-        return y, r
+        return y, concat
 
     def init_weights(self, pretrained='', print_load_info=False):
         logger.info('=> init weights from normal distribution')
