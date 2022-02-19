@@ -49,7 +49,6 @@ class stanford(Dataset):
         self.aspect_ratio = self.image_width * 1.0 / self.image_height
         self.transform = transform
         self.rotation = cfg.DATASET.ROT_FACTOR
-        self.scale_factor = cfg.DATASET.SCALE_FACTOR
         self.is_train = is_train
         # self.Tensor = T.ToTensor()
         # self.Resize = T.Resize((224, 224))
@@ -83,10 +82,10 @@ class stanford(Dataset):
         for i, img in enumerate(self.anno['annotation'][0]):
             # print(img[0])
             if img[0][0][0].item() in contents:
-                self.img_name.append(img[0][0][0].item()) # image name
-                self.images.append(os.path.join(self.root_img,self.img_name[j])) # image root
+                self.img_name.append(img[0][0][0].item())  # image name
+                self.images.append(os.path.join(self.root_img, self.img_name[j]))  # image root
                 key = self.img_name[j].split('.')[0][:-4]
-                self.action.append(b[key]) # image action
+                self.action.append(b[key])  # image action
                 # self.action.append(self.img_name[i].split('.')[0][:-4]) # image action
                 self.boxes = []
                 for box in img[0][0][1]:
@@ -103,15 +102,26 @@ class stanford(Dataset):
                                        'scale': scale
                                        })
                 self.annotations.append({
-                    'image_name' : self.img_name[j],
-                    'image_root' : self.images[j],
-                    'action' : self.action[j],
+                    'image_name': self.img_name[j],
+                    'image_root': self.images[j],
+                    'action': self.action[j],
                     'center': self.boxes[0]['center'],
                     'scale': self.boxes[0]['scale'],
-                    'image_size' : [0,0],
+                    'image_size': [0, 0],
 
                 })
                 j += 1
+
+    def new_center_scale(self, c, s, raw_image_height, raw_image_width):
+        '''scale [0] width, [1] height'''
+        scale = s * 200.0
+        w = min(raw_image_width - c[0], c[0])
+        h = min(raw_image_height - c[1], c[1])
+        half_scale_width = random.uniform(scale[0] * 0.5, w)
+        half_scale_height = random.uniform(scale[1] * 0.5, h)
+        s_new = np.array([half_scale_width * 2.0 / 200.0, half_scale_height * 2.0 / 200.0])
+        return c, s_new
+
     def __getitem__(self, idx):
         # img = cv2.imread(
         #     self.images[x], cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION
@@ -136,6 +146,9 @@ class stanford(Dataset):
                 image_file, cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION
             )
 
+        self.raw_image_height = data_numpy.shape[0]
+        self.raw_image_width = data_numpy.shape[1]
+
         if self.color_rgb:
             data_numpy = cv2.cvtColor(data_numpy, cv2.COLOR_BGR2RGB)
 
@@ -148,14 +161,12 @@ class stanford(Dataset):
 
         c = db_rec['center']
         s = db_rec['scale']
-        score = db_rec['score'] if 'score' in db_rec else 1
-        if self.is_train:
-            # r = random.randint(-self.rotation, self.rotation)
-            r = 0
-        else:
-            r = 0
 
-        # r = 0
+        if self.is_train:
+            c, s = self.new_center_scale(c, s, self.raw_image_height, self.raw_image_width)
+        score = db_rec['score'] if 'score' in db_rec else 1
+        # r = random.randint(0, self.rotation)
+        r = 0
 
         # if self.is_train:
         #     if (np.sum(joints_vis[:, 0]) > self.num_joints_half_body
@@ -247,8 +258,10 @@ class stanford(Dataset):
         return input, meta
 
         # return img, self.annotations[x]
+
     def __len__(self):
         return len(self.annotations)
+
     def _box2cs(self, box):
         x, y, w, h = box[:4]
         return self._xywh2cs(x, y, w, h)
@@ -265,10 +278,11 @@ class stanford(Dataset):
         scale = np.array(
             [w * 1.0 / self.pixel_std, h * 1.0 / self.pixel_std],
             dtype=np.float32)
-        if center[0] != -1:
-            scale = scale * 1.25
+        # if center[0] != -1:
+        #     scale = scale * 1.25
 
         return center, scale
+
 
 # stan = Stanford40()
 # img, anno = stan[500]
@@ -296,3 +310,4 @@ it doesnt work for this new structure of ___getitem___"""
 # # Add the patch to the Axes
 # ax.add_patch(rect)
 # plt.show()
+
